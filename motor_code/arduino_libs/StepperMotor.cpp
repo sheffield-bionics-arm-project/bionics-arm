@@ -35,56 +35,56 @@ void StepperMotor::stepOnce()
 
   switch (_commutation_state)
   {
-    case 0
+    case 0:
       digitalWrite(_pin_coil_1, LOW);
       digitalWrite(_pin_coil_2, HIGH);
       digitalWrite(_pin_coil_3, HIGH);
       digitalWrite(_pin_coil_4, HIGH);
       break;
 
-    case 1
+    case 1:
       digitalWrite(_pin_coil_1, LOW);
       digitalWrite(_pin_coil_2, HIGH);
       digitalWrite(_pin_coil_3, LOW);
       digitalWrite(_pin_coil_4, HIGH);
       break;
 
-    case 2
+    case 2:
       digitalWrite(_pin_coil_1, HIGH);
       digitalWrite(_pin_coil_2, HIGH);
       digitalWrite(_pin_coil_3, LOW);
       digitalWrite(_pin_coil_4, HIGH);
       break;
 
-    case 3
+    case 3:
       digitalWrite(_pin_coil_1, HIGH);
       digitalWrite(_pin_coil_2, LOW);
       digitalWrite(_pin_coil_3, LOW);
       digitalWrite(_pin_coil_4, HIGH);
       break;
 
-    case 4
+    case 4:
       digitalWrite(_pin_coil_1, HIGH);
       digitalWrite(_pin_coil_2, LOW);
       digitalWrite(_pin_coil_3, HIGH);
       digitalWrite(_pin_coil_4, HIGH);
       break;
 
-    case 5
+    case 5:
       digitalWrite(_pin_coil_1, HIGH);
       digitalWrite(_pin_coil_2, LOW);
       digitalWrite(_pin_coil_3, HIGH);
       digitalWrite(_pin_coil_4, LOW);
       break;
 
-    case 6
+    case 6:
       digitalWrite(_pin_coil_1, HIGH);
       digitalWrite(_pin_coil_2, HIGH);
       digitalWrite(_pin_coil_3, HIGH);
       digitalWrite(_pin_coil_4, LOW);
       break;
 
-    case 7
+    case 7:
       digitalWrite(_pin_coil_1, LOW);
       digitalWrite(_pin_coil_2, HIGH);
       digitalWrite(_pin_coil_3, HIGH);
@@ -99,12 +99,26 @@ void StepperMotor::stepOnce()
 void StepperMotor::setSpeed(float speed_rpm)
 {
   _delay_amount = 60 * 1000 / _steps_per_rev / abs(speed_rpm);
+  int prev_direction = _direction;
   _direction = speed_rpm / abs(speed_rpm);
+
+  if (prev_direction = _direction * -1) // if change in direction, update next commutation state accordingly
+  {
+    //this is required in case motor speed changes sign between commutations
+    _commutation_state = (_commutation_state + _direction) % 8;
+  }
+  
 }
 
-void StepperMotor::rotateThroughAngle(float angle_deg, float max_speed_rpm=NULL)
+void StepperMotor::rotateThroughAngle(float angle_deg)
 {
   int num_steps = (angle_deg / 360.0) * _steps_per_rev;
 }
 
 void StepperMotor::cycleSteps()
+{
+  for (int i; i < 8; i++)
+  {
+    stepOnce();
+  }  
+}

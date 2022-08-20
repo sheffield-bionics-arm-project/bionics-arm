@@ -16,7 +16,7 @@ class StepperMotor
     StepperMotor(int steps_per_rev, int speed_rpm, int pin_coil_1, int pin_coil_2, int pin_coil_3, int pin_coil_4);
     void setSpeed(float speed_rpm);
     void rotateThroughAngle(float angle);
-    void stepOnce(int commutation_state);
+    void stepOnce();
     void cycleSteps(); //used for initialization to synchronize position
 
   private:
