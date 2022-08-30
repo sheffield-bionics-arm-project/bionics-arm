@@ -1,6 +1,6 @@
 /*
-  BLDC.C - Library for controlling a BLDC motor using a 
-   L293D driver board (or similar). To be used for Arduino
+  BLDC.C - Library for controlling a BLDC motor. 
+  To be used for Arduino.
   Created by David Wilkinson (Sheffield Bionics) 23-08-2022.
   Released into the public domain.
 */
@@ -34,9 +34,23 @@ BLDC::BLDC(int pin_Ah, int pin_Al, int pin_Bh, int pin_Bl, int pin_Ch, int pin_C
 
     //_delay_amount = (unsigned long) (60.0 * 1000.0 / _steps_per_rev / speed_rpm); // delay is in ms thus * 1000, dependent on required speed
     _last_switch_time = 0;
+    ramp_done = 0;
 }
 
-BLDC::rampUp(int init_period, int final_period, int ramp_delay)
-{
+unsigned long current_time;
 
+BLDC::rampUpSpeedDutyCycle(int final_duty_cycle, int ramp_delay)
+{
+    current_time = millis();
+    if (current_time - _last_switch_time >= ramp_delay)
+    {
+        if (duty_cycle < final_duty_cycle)
+        {
+            duty_cycle++;
+        }
+        else
+            ramp_done = 1;
+        
+    }
+    
 }
