@@ -23,7 +23,7 @@ class BLDC
   private:
     int _pin_Ah, _pin_Al, _pin_Bh, _pin_Bl, _pin_Ch, _pin_Cl;   // gate driver pins
     int _counter, _commutation_period;              // vars for open-loop control
-    unsigned long _last_switch_time,                            // time that previous switch event occurred
+    unsigned long _last_switch_time;                            // time that previous switch event occurred
 };
 
 #endif

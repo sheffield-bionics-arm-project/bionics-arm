@@ -39,7 +39,7 @@ BLDC::BLDC(int pin_Ah, int pin_Al, int pin_Bh, int pin_Bl, int pin_Ch, int pin_C
 
 unsigned long current_time;
 
-BLDC::rampUpSpeedDutyCycle(int final_duty_cycle, int ramp_delay)
+void BLDC::rampUpSpeedDutyCycle(int final_duty_cycle, int final_period, int ramp_delay)
 {
     current_time = millis();
     if (current_time - _last_switch_time >= ramp_delay)
