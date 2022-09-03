@@ -1,6 +1,6 @@
 /*
   example_main_code.c - Example Main Code file for Bionics Arduino code.
-  Utilizes state machine for running background tasks at fixed sample rates,
+  Utilizes state machines for running background tasks at fixed sample rates,
     allowing different rates for different tasks.
   Created by David Wilkinson (Sheffield Bionics) 03-09-2022.
   Released into the public domain.
@@ -40,6 +40,7 @@ Base_State_Ptr = &A0;
 A_Task_Ptr = &A1;
 B_Task_Ptr = &B1;
 
+
 //=================================================================================
 //	STATE-MACHINE SEQ/SYNC FOR BACKGROUND TASKS
 //=================================================================================
@@ -72,14 +73,26 @@ B_Task_Ptr = &B1;
         Additional task types (C, D...) can be added with ease to allow different task rates.
             Simply move the Base_State_Ptr of the last base state (B0 by default) to &C0 (for example)
             and follow the same code structure as A and B tasks follow.
+
+        The advantage of this structure is that not all tasks are required to run on every loop of Arduino code.
+            For example, reading EMG signals does not need to occur on EVERY loop, but as these functions ARE
+            time-critical and must be called on a FIXED sample rate (which cannot be guaranteed when calling in void loop())
+            then putting them in the below state machine structure will ensure a more consistent sample rate.
+        
+        Algorithms such as digital filters and controllers need to be executed at a consistent rate, as these algorithms
+            are dependent on sampling frequency. 
+
+        The below structure simplifies the assertion of sampling frequency
+            by utilizing millis() to check the time between task execution.
 */
+
 
 void A0(void)
 {
-    if (millis() - A_Task_Tmr > (A_TASK_RATE))
+    if (millis() - A_Task_Tmr >= (A_TASK_RATE))
     {
-        A_Task_Tmr = millis();  // update time of A task
-        (*A_Task_Ptr)();        // calls next A Task, thus actual A Task rate is dependent on no. of A Tasks
+        A_Task_Tmr = millis();  // update time of current A task execution
+        (*A_Task_Ptr)();        // calls next A Task
     }
     
     Base_State_Ptr = &B0;
@@ -87,43 +100,63 @@ void A0(void)
 
 void B0(void)
 {
-    if (millis() - B_Task_Tmr > (B_TASK_RATE))
+    if (millis() - B_Task_Tmr >= (B_TASK_RATE))
     {
-        A_Task_Tmr = millis();
-        (*B_Task_Ptr)();
+        A_Task_Tmr = millis();  // update time of current B task execution
+        (*B_Task_Ptr)();        // calls next B task
     }
 
     Base_State_Ptr = &A0;
 }
 
 
-
 // ---- A Tasks (executed every "A_TASK_RATE"-milliseconds) ----
 void A1(void)
 {
-    
+    // example function calls for A tasks
+
+    // moveMotors();
+
+    A_Task_Ptr = &A2;
 }
 
 
 void A2(void)
 {
+    // example function calls for A tasks
 
+    // lockArmPosition();
+    //other fast-rate functions
+
+    A_Task_Ptr = &A1;
 }
 
 
 // ---- B Tasks (executed at B_TASK_RATE period, in ms) ----
 void B1(void)
 {
+    // example function calls for B tasks
 
+    // readEmgSignals();
+    // processEmgReading();
+
+    B_Task_Ptr = &B2;
 }
 
 void B2(void)
 {
+    // example function calls for B tasks
+    
+    // monitorBatteryHealth();
 
+    B_Task_Ptr = &B1;
 }
 
 
+
+
 // ---- MAIN ARDUINO CODE ----
+
 
 void setup()
 {
