@@ -14,15 +14,14 @@ ServoMotor::ServoMotor(float default_angle = 90)
     _default_angle = default_angle;
     _curr_angle = _default_angle;
     _moving = 0;
+    _task_freq = 10;
+    ServoMotor::setAngSpdDeg(180);
 }
 
 void ServoMotor::rotateThroughAngle(float angle)
 {
-    _moving = 1;
     angle = ServoMotor::saturateAngle(ServoMotor::read() + angle);
-    ServoMotor::write(angle);
-
-    _moving = 0;
+    _req_angle = angle;
 }
 
 void ServoMotor::rotateToAngle(float angle)
@@ -31,15 +30,23 @@ void ServoMotor::rotateToAngle(float angle)
     _req_angle = angle;
 }
 
-void ServoMotor::setParams(int pin, unsigned long moving_time = 3000, float default_angle = 90, int min_pulse_width = 544, int max_pulse_width = 2400)
+void ServoMotor::setParams(int pin, float task_freq, float ang_spd = 180.0, float default_angle = 90.0, int min_pulse_width = 544, int max_pulse_width = 2400)
 {
     _default_angle = default_angle;
     ServoMotor::attach(pin, min_pulse_width, max_pulse_width);
+    _task_freq = task_freq;
+    ServoMotor::setAngSpdDeg(ang_spd);
 }
 
-void ServoMotor::setAngSpd(float ang_spd)
+void ServoMotor::setAngSpdDeg(float ang_spd)
 {
-    _ang_spd = ang_spd;
+    // increment is determined by task frequency and desired angular speed
+    //  task_freq in kHz, ang_spd in deg/s
+    //  number of possible rotation calls per second 'n' = task_freq * 1000
+    // to get increment per rotation, 
+    //  ang_spd / n
+    _angle_increment = ang_spd / (1000.0 * _task_freq);
+    Serial.println(_angle_increment);
 }
 
 float ServoMotor::saturateAngle(float angle)
@@ -56,9 +63,9 @@ float ServoMotor::saturateAngle(float angle)
         return angle;
 }
 
-float ServoMotor::checkMove()
+void ServoMotor::checkMove()
 {
-    _moving = _curr_angle != _req_angle ? 1 : 0; 
+    _moving = abs(_req_angle - _curr_angle) > _angle_increment ? 1 : 0; 
     if (_moving)
     {
         ServoMotor::rotate();
@@ -68,12 +75,16 @@ float ServoMotor::checkMove()
 
 void ServoMotor::rotate()
 {
-    float new_angle;
-
-    if ((_req_angle - _curr_angle) > _angle_increment)
+    float _new_angle;
+    if (_req_angle > _curr_angle)
     {
-       new_angle
+        _new_angle = _curr_angle + _angle_increment;
+    }
+    else if (_req_angle < _curr_angle)
+    {
+        _new_angle = _curr_angle - _angle_increment;
     }
     
-    ServoMotor::write(angle);
+    ServoMotor::write(_new_angle);
+    _curr_angle = _new_angle;
 }
