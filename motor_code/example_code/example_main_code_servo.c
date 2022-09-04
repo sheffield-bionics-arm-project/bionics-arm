@@ -1,7 +1,7 @@
 /*
-  example_main_code.c - Example Main Code file for Bionics Arduino code.
+  example_main_code_servo.c - Example Main Code file with added Servo Lib.
   Utilizes state machines for running background tasks at fixed sample rates,
-    allowing different rates for different tasks.
+    allowing different rates for different tasks. Includes servo lib call for demo.
   Created by David Wilkinson (Sheffield Bionics) 03-09-2022.
   Released into the public domain.
 */
